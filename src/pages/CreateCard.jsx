@@ -22,7 +22,9 @@ const CreateCard = ({ goToPage }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (isNaN(value)) return;
+    console.log(name);
+    if (name !== 'username' && isNaN(value)) return;
+    if (value === ' ') return;
     setInputs(prev => ({
       ...prev,
       [name]: value
@@ -35,23 +37,26 @@ const CreateCard = ({ goToPage }) => {
     const cardInputElem4 = numInputs.current.children[6];
     const expirationMonthElem = expritionInputs.current.children[0];
     const expirationYearElem = expritionInputs.current.children[1];
-    // const usernameInputElem = 
+    const usernameInputElem = usernameInput.current;
 
     const validationList = [
       [cardNum1.length > 3, cardInputElem2],
       [cardNum2.length > 3, cardInputElem3],
       [cardNum3.length > 3, cardInputElem4],
       [cardNum4.length > 3, expirationMonthElem],
-      [expirationMonth.length > 1, expirationYearElem]
-    ]
+      [expirationMonth.length > 1, expirationYearElem],
+      [expirationYear.length > 1, usernameInputElem],
+    ];
 
+    let target = null;
     for (const [result, elem] of validationList) {
       if (result) {
-        elem.focus();
+        target = elem;
       } else {
         break;
       }
     }
+    target && target.focus();
   }, [inputs]);
 
   return (
@@ -69,12 +74,12 @@ const CreateCard = ({ goToPage }) => {
             <div className="card-bottom__number">
               <span className="card-text">{cardNum1}</span>
               <span className="card-text">{cardNum2}</span>
-              <span className="card-text">{cardNum3.replace(/[0-9]/g, '*')}</span>
-              <span className="card-text">{cardNum4.replace(/[0-9]/g, '*')}</span>
+              <span className="card-text">{cardNum3.replace(/[0-9]/g, '●')}</span>
+              <span className="card-text">{cardNum4.replace(/[0-9]/g, '●')}</span>
 						</div>
 						<div className="card-bottom__info">
-							<span className="card-text">NAME</span>
-							<span className="card-text">MM / YY</span>
+							<span className="card-text">{username || 'NAME'}</span>
+              <span className="card-text">{expirationMonth || 'MM'} / {expirationYear || 'YY'}</span>
 						</div>
 					</div>
 				</div>
@@ -89,9 +94,10 @@ const CreateCard = ({ goToPage }) => {
         </div>
 			</div>
 			<div className="input-container">
-				<span className="input-title">만료일</span>
-				<div className="input-box w-50" ref={expritionInputs}>
-					<input 
+        <label htmlFor='test' className="input-title">만료일</label>
+				<div  className="input-box w-50" ref={expritionInputs}>
+          <input 
+            id='test'
             className="input-basic" 
             type="text" 
             placeholder="MM" 
@@ -117,21 +123,44 @@ const CreateCard = ({ goToPage }) => {
 				<span className="input-title">카드 소유자 이름(선택)</span>
 				<input
           ref={usernameInput}
-					type="text"
+          type="text"
+          name='username'
+          value={username}
+          onChange={handleInputChange}
           className="input-basic"
 					placeholder="카드에 표시된 이름과 동일하게 입력하세요."
 				/>
 			</div>
 			<div className="input-container">
 				<span className="input-title">보안코드(CVC/CVV)</span>
-				<input className="input-basic w-25" type="password" />
+        <input
+          className="input-basic w-25"
+          type="password"
+          name='securityCode'
+          value={securityCode}
+          onChange={handleInputChange}
+          minLength={3}
+          maxLength={3}
+        />
 			</div>
 			<div className="input-container">
 				<span className="input-title">카드 비밀번호</span>
-				<input className="input-basic w-15" type="password" />
-				<input className="input-basic w-15" type="password" />
-				<input className="input-basic w-15" type="password" />
-				<input className="input-basic w-15" type="password" />
+				<input 
+          className="input-basic w-15" 
+          type="password" 
+        />
+				<input 
+          className="input-basic w-15" 
+          type="password" 
+        />
+				<input 
+          className="input-basic w-15" 
+          type="password" 
+        />
+				<input 
+          className="input-basic w-15" 
+          type="password" 
+        />
 			</div>
 			<div className="button-box" onClick={() => goToPage(2)}>
 				<span className="button-text">다음</span>
