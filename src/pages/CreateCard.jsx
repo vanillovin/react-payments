@@ -3,6 +3,8 @@ import CardNumInput from '../components/Input/CardNumInput';
 
 const CreateCard = ({ goToPage }) => {
   const numInputs = useRef(null);
+  const expritionInputs = useRef(null);
+  const usernameInput = useRef(null);
 
   // 서로 다른 상태를 섞어놓지 않기.
   const [inputs, setInputs] = useState({
@@ -10,14 +12,15 @@ const CreateCard = ({ goToPage }) => {
     cardNum2: '',
     cardNum3: '',
     cardNum4: '',
-    expiration: '',
+    expirationMonth: '',
+    expirationYear: '',
     username: '',
-    cvccode: '',
+    securityCode: '',
     password: ''
   })
-  const { cardNum1, cardNum2, cardNum3, cardNum4 } = inputs;
+  const { cardNum1, cardNum2, cardNum3, cardNum4, expirationMonth, expirationYear, username, securityCode, password } = inputs;
 
-  const cardNumChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (isNaN(value)) return;
     setInputs(prev => ({
@@ -30,9 +33,25 @@ const CreateCard = ({ goToPage }) => {
     const cardInputElem2 = numInputs.current.children[2];
     const cardInputElem3 = numInputs.current.children[4];
     const cardInputElem4 = numInputs.current.children[6];
-    cardNum1.length > 3 && cardInputElem2.focus();
-    cardNum2.length > 3 && cardInputElem3.focus();
-    cardNum3.length > 3 && cardInputElem4.focus();
+    const expirationMonthElem = expritionInputs.current.children[0];
+    const expirationYearElem = expritionInputs.current.children[1];
+    // const usernameInputElem = 
+
+    const validationList = [
+      [cardNum1.length > 3, cardInputElem2],
+      [cardNum2.length > 3, cardInputElem3],
+      [cardNum3.length > 3, cardInputElem4],
+      [cardNum4.length > 3, expirationMonthElem],
+      [expirationMonth.length > 1, expirationYearElem]
+    ]
+
+    for (const [result, elem] of validationList) {
+      if (result) {
+        elem.focus();
+      } else {
+        break;
+      }
+    }
   }, [inputs]);
 
   return (
@@ -63,24 +82,43 @@ const CreateCard = ({ goToPage }) => {
 			<div className="input-container">
 				<span className="input-title">카드 번호</span>
         <div ref={numInputs} className="input-box">
-          <CardNumInput name="cardNum1" value={cardNum1} onChange={cardNumChange}/>
-          <CardNumInput name="cardNum2" value={cardNum2} onChange={cardNumChange}/>
-          <CardNumInput type="password" name="cardNum3" value={cardNum3} onChange={cardNumChange}/>
-          <CardNumInput final={true} type="password" name="cardNum4" value={cardNum4} onChange={cardNumChange}/>         
+          <CardNumInput name="cardNum1" value={cardNum1} onChange={handleInputChange}/>
+          <CardNumInput name="cardNum2" value={cardNum2} onChange={handleInputChange}/>
+          <CardNumInput type="password" name="cardNum3" value={cardNum3} onChange={handleInputChange}/>
+          <CardNumInput final={true} type="password" name="cardNum4" value={cardNum4} onChange={handleInputChange}/>         
         </div>
 			</div>
 			<div className="input-container">
 				<span className="input-title">만료일</span>
-				<div className="input-box w-50">
-					<input className="input-basic" type="text" placeholder="MM" />
-					<input className="input-basic" type="text" placeholder="YY" />
+				<div className="input-box w-50" ref={expritionInputs}>
+					<input 
+            className="input-basic" 
+            type="text" 
+            placeholder="MM" 
+            name='expirationMonth' 
+            value={expirationMonth}
+            onChange={handleInputChange} 
+            minLength={2}
+            maxLength={2}
+          />
+					<input 
+            className="input-basic" 
+            type="text" 
+            placeholder="YY"
+            name='expirationYear' 
+            value={expirationYear}
+            onChange={handleInputChange} 
+            minLength={2}
+            maxLength={2}
+          />
 				</div>
 			</div>
 			<div className="input-container">
 				<span className="input-title">카드 소유자 이름(선택)</span>
 				<input
+          ref={usernameInput}
 					type="text"
-					className="input-basic"
+          className="input-basic"
 					placeholder="카드에 표시된 이름과 동일하게 입력하세요."
 				/>
 			</div>
