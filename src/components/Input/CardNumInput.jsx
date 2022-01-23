@@ -9,6 +9,7 @@ const CardNumInput = ({ type="text", name, value, onChange, final=false }) => {
   return (
    <>
     <input 
+      id='card-num'
       type={type}
       name={name}
       value={value}
