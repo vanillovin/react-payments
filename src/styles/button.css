@@ -6,3 +6,10 @@
 .button-text {
   margin-right: 10px;
 }
+
+.createNext {
+  width: auto;
+  border: none;
+  padding: 10px;
+  background-color: transparent;
+}
