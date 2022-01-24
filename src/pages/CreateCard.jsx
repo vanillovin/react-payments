@@ -1,14 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import CardNumInput from '../components/Input/CardNumInput';
 import CardSelectorModal from '../components/CardSelectorModal';
 
 const CreateCard = ({ goToPage }) => {
-  const numInputs = useRef(null);
-  const expritionInputs = useRef(null);
-  const usernameInput = useRef(null);
-  const passwordInputs = useRef(null);
-  const nextButton = useRef(null);
-
   // forwradRef
   // Controlled (react) <-> Uncontrolled (vanilla js)
   // 상태가 없는 것과 있는 것
@@ -42,6 +36,7 @@ const CreateCard = ({ goToPage }) => {
     password: { first, second, third, fourth },
   } = inputs;
   const [modal, setModal] = useState(true);
+  // 밖에?
   const cards = [
     {
       name: '포코',
@@ -91,7 +86,8 @@ const CreateCard = ({ goToPage }) => {
   // 두 개의 매개변수(validate, nextElem)만 미리 받아서ㅡ e를 받아서 처리하는 event handler를 반환
 
   // ate 동사 tion 명사 - validate 검증하다 / validation 검증
-  function handleInputChange(validate, nextElem) {
+  // 간단하게. 짧은것 <<< 읽기쉬운것 <<<<<< 짧으면서읽기쉬운것
+  function handleInputChange(validate, nextElemId) {
     return e => {
       const { name, value, pattern } = e.target;
       console.log(pattern);
@@ -99,12 +95,15 @@ const CreateCard = ({ goToPage }) => {
         // 패턴이 있고 통과하지 못하면
         return;
       }
+      // 쓰는곳이랑 가까이
+      const isNumberText = text => !isNaN(text);
       if (name !== 'username') {
-        if (isNaN(value)) return;
+        if (!isNumberText(value)) return;
       } else {
-        if (!isNaN(value)) return;
+        if (isNumberText(value)) return;
       }
       // 띄어쓰기 막기
+
       setInputs(prev => ({
         ...prev,
         [name]: value,
@@ -114,22 +113,13 @@ const CreateCard = ({ goToPage }) => {
         },
       }));
 
+      const nextElem = document.getElementById(nextElemId);
+
       if (validate(value)) {
         nextElem.focus();
       }
     };
   }
-
-  const cardInputElem2 = numInputs.current?.children[2];
-  const cardInputElem3 = numInputs.current?.children[4];
-  const cardInputElem4 = numInputs.current?.children[6];
-  const expirationMonthElem = expritionInputs.current?.children[0];
-  const expirationYearElem = expritionInputs.current?.children[1];
-  const usernameInputElem = usernameInput.current;
-  const passwordElem1 = passwordInputs.current?.children[1];
-  const passwordElem2 = passwordInputs.current?.children[2];
-  const passwordElem3 = passwordInputs.current?.children[3];
-  const passwordElem4 = passwordInputs.current?.children[4];
 
   // 다음으로
   const test = () => {
@@ -137,11 +127,12 @@ const CreateCard = ({ goToPage }) => {
     goToPage(2);
   };
 
+  // 컴포넌트 분리
   const pwStateArr = [
-    { id: 'first', state: first, nextElem: passwordElem2 },
-    { id: 'second', state: second, nextElem: passwordElem3 },
-    { id: 'third', state: third, nextElem: passwordElem4 },
-    { id: 'fourth', state: fourth, nextElem: nextButton.current },
+    { id: 'first', state: first, nextId: 'second-pw' },
+    { id: 'second', state: second, nextId: 'third-pw' },
+    { id: 'third', state: third, nextId: 'fourth-pw' },
+    { id: 'fourth', state: fourth, nextId: 'nextButton' },
   ];
 
   // 낯선것 어려운것-익숙 재미없는것
@@ -196,6 +187,7 @@ const CreateCard = ({ goToPage }) => {
 
   // num에 따라 정해지는 파생상태
   const handleCardClick = cardNum => {
+    // useState 비동기 순서
     setInputs(prev => ({
       ...prev,
       cardNum1: cardNum.cardNum1,
@@ -218,6 +210,7 @@ const CreateCard = ({ goToPage }) => {
           style={getCardColor(cardNum1, cardNum2)}
           onClick={() => setModal(true)}
         >
+          {/* inline style -> className */}
           <div className="card-top">{getCardName(cardNum1, cardNum2)} 카드</div>
           <div className="card-middle">
             <div className="small-card__chip"></div>
@@ -246,72 +239,70 @@ const CreateCard = ({ goToPage }) => {
         <label htmlFor="cardNum1" className="input-title">
           카드 번호
         </label>
-        <div ref={numInputs} className="input-box">
+        <div className="input-box">
           <CardNumInput
+            id="cardNum1"
             name="cardNum1"
             value={cardNum1}
-            onChange={handleInputChange(
-              value => value.length > 3,
-              cardInputElem2,
-            )}
+            onChange={handleInputChange(value => value.length > 3, 'cardNum2')}
           />
           <CardNumInput
+            id="cardNum2"
             name="cardNum2"
             value={cardNum2}
-            onChange={handleInputChange(
-              value => value.length > 3,
-              cardInputElem3,
-            )}
+            onChange={handleInputChange(value => value.length > 3, 'cardNum3')}
           />
           <CardNumInput
+            id="cardNum3"
             type="password"
             name="cardNum3"
             value={cardNum3}
-            onChange={handleInputChange(
-              value => value.length > 3,
-              cardInputElem4,
-            )}
+            onChange={handleInputChange(value => value.length > 3, 'cardNum4')}
           />
           <CardNumInput
+            id="cardNum4"
             final={true}
             type="password"
             name="cardNum4"
             value={cardNum4}
             onChange={handleInputChange(
               value => value.length > 3,
-              expirationMonthElem,
+              'exprition-month',
             )}
           />
         </div>
         <div style={{ color: 'red', fontSize: 12 }}>
-          {getCardName(cardNum1, cardNum2) === '유효하지 않은' &&
+          {cardNum1 &&
+            cardNum2 &&
+            getCardName(cardNum1, cardNum2) === '유효하지 않은' &&
             '유효하지 않은 카드번호입니다.'}
         </div>
       </div>
       <div className="input-container">
-        <label htmlFor="exprition-day" className="input-title">
+        <label htmlFor="exprition-month" className="input-title">
           만료일
         </label>
-        <div className="input-box w-50" ref={expritionInputs}>
+        <div className="input-box w-50">
           <input
-            id="exprition-day"
+            id="exprition-month"
             className="input-basic"
             type="text"
             placeholder="MM"
             name="expirationMonth"
             value={expirationMonth}
-            onChange={handleInputChange(v => v.length > 1, expirationYearElem)}
+            onChange={handleInputChange(v => v.length > 1, 'exprition-year')}
             minLength={2}
             maxLength={2}
             pattern="^(0[1-9]|1[0-2]|[0-1])$"
           />
           <input
+            id="exprition-year"
             className="input-basic"
             type="text"
             placeholder="YY"
             name="expirationYear"
             value={expirationYear}
-            onChange={handleInputChange(v => v.length > 1, usernameInputElem)}
+            onChange={handleInputChange(v => v.length > 1, 'username')}
             minLength={2}
             maxLength={2}
           />
@@ -323,17 +314,18 @@ const CreateCard = ({ goToPage }) => {
         </label>
         <input
           id="username"
-          ref={usernameInput}
           type="text"
           name="username"
           value={username}
           minLength={1}
-          maxLength={18}
+          maxLength={30}
           onChange={handleInputChange(() => false, null)}
           className="input-basic"
           placeholder="카드에 표시된 이름과 동일하게 입력하세요."
         />
       </div>
+
+      {/* getElementById 문제점 - id가 바뀌었을 때 헷갈림 */}
       <div className="input-container">
         <label htmlFor="security-code" className="input-title">
           보안코드(CVC/CVV)
@@ -344,18 +336,18 @@ const CreateCard = ({ goToPage }) => {
           type="password"
           name="securityCode"
           value={securityCode}
-          onChange={handleInputChange(v => v.length > 2, passwordElem1)}
+          onChange={handleInputChange(v => v.length > 2, 'first-pw')}
           minLength={3}
           maxLength={3}
         />
       </div>
-      <div className="input-container" ref={passwordInputs}>
-        <label htmlFor="card-pw" className="input-title">
+      <div className="input-container">
+        <label htmlFor="first-pw" className="input-title">
           카드 비밀번호
         </label>
-        {pwStateArr.map(({ id, state, nextElem }) => (
+        {pwStateArr.map(({ id, state, nextId }) => (
           <input
-            id="card-pw"
+            id={id + '-pw'}
             key={id}
             className="input-basic w-11"
             type="password"
@@ -363,11 +355,11 @@ const CreateCard = ({ goToPage }) => {
             maxLength={1}
             name={id}
             value={state}
-            onChange={handleInputChange(v => v.length > 0, nextElem)}
+            onChange={handleInputChange(v => v.length > 0, nextId)}
           />
         ))}
       </div>
-      <button ref={nextButton} className="button-box createNext" onClick={test}>
+      <button id="nextButton" className="button-box createNext" onClick={test}>
         <span className="button-text">다음</span>
       </button>
     </div>
