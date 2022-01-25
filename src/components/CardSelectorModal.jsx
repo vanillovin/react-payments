@@ -1,9 +1,12 @@
 import React from 'react';
 
-const CardSelectorModal = ({ cards, handleCardClick }) => {
+const CardSelectorModal = ({ cards, handleCardClick, closeModal }) => {
   return (
     <div className="modal-dimmed">
       <div className="modal">
+        <button className="close-modal-button" onClick={closeModal}>
+          ❌
+        </button>
         <div className="flex-center">
           {cards.slice(0, 4).map(item => (
             <div
