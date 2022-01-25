@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import CardNumInput from '../components/Input/CardNumInput';
 import CardSelectorModal from '../components/CardSelectorModal';
+import CardExpirationInput from '../components/CardExpirationInput';
+import Message from '../components/Message';
 
 const CreateCard = ({ goToPage }) => {
   // forwradRef
@@ -127,7 +129,13 @@ const CreateCard = ({ goToPage }) => {
     goToPage(2);
   };
 
-  // 컴포넌트 분리
+  // 컴포넌트 분리?
+  const numStateArr = [
+    { id: 'cardNum1', state: cardNum1, nextId: 'cardNum2' },
+    { id: 'cardNum2', state: cardNum2, nextId: 'cardNum3' },
+    { id: 'cardNum3', state: cardNum3, nextId: 'cardNum4' },
+    { id: 'cardNum4', state: cardNum4, nextId: 'expiration-month' },
+  ];
   const pwStateArr = [
     { id: 'first', state: first, nextId: 'second-pw' },
     { id: 'second', state: second, nextId: 'third-pw' },
@@ -199,11 +207,25 @@ const CreateCard = ({ goToPage }) => {
   return (
     <div className="CreateCard" style={{ padding: 15 }}>
       {modal && (
-        <CardSelectorModal cards={cards} handleCardClick={handleCardClick} />
+        <CardSelectorModal
+          cards={cards}
+          handleCardClick={handleCardClick}
+          closeModal={() => setModal(false)}
+        />
       )}
 
-      <button onClick={() => goToPage(0)}>{'<'}</button>
-      <h2 className="page-title">카드 추가</h2>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <button className="back-button" onClick={() => goToPage(0)}>
+          {'<'}
+        </button>
+        <h2 className="page-title">카드 추가</h2>
+      </div>
+
       <div className="card-box">
         <div
           className="empty-card"
@@ -240,74 +262,29 @@ const CreateCard = ({ goToPage }) => {
           카드 번호
         </label>
         <div className="input-box">
-          <CardNumInput
-            id="cardNum1"
-            name="cardNum1"
-            value={cardNum1}
-            onChange={handleInputChange(value => value.length > 3, 'cardNum2')}
-          />
-          <CardNumInput
-            id="cardNum2"
-            name="cardNum2"
-            value={cardNum2}
-            onChange={handleInputChange(value => value.length > 3, 'cardNum3')}
-          />
-          <CardNumInput
-            id="cardNum3"
-            type="password"
-            name="cardNum3"
-            value={cardNum3}
-            onChange={handleInputChange(value => value.length > 3, 'cardNum4')}
-          />
-          <CardNumInput
-            id="cardNum4"
-            final={true}
-            type="password"
-            name="cardNum4"
-            value={cardNum4}
-            onChange={handleInputChange(
-              value => value.length > 3,
-              'exprition-month',
-            )}
-          />
+          {numStateArr.map(({ id, state, nextId }) => (
+            <CardNumInput
+              id={id}
+              name={id}
+              value={state}
+              onChange={handleInputChange(value => value.length > 3, nextId)}
+              final={id === 'cardNum4'}
+            />
+          ))}
         </div>
-        <div style={{ color: 'red', fontSize: 12 }}>
-          {cardNum1 &&
-            cardNum2 &&
-            getCardName(cardNum1, cardNum2) === '유효하지 않은' &&
-            '유효하지 않은 카드번호입니다.'}
-        </div>
+        <Message
+          type="error"
+          text="유효하지 않은 카드번호 입니다."
+          cond={getCardName(cardNum1, cardNum2) === '유효하지 않은'}
+        />
       </div>
-      <div className="input-container">
-        <label htmlFor="exprition-month" className="input-title">
-          만료일
-        </label>
-        <div className="input-box w-50">
-          <input
-            id="exprition-month"
-            className="input-basic"
-            type="text"
-            placeholder="MM"
-            name="expirationMonth"
-            value={expirationMonth}
-            onChange={handleInputChange(v => v.length > 1, 'exprition-year')}
-            minLength={2}
-            maxLength={2}
-            pattern="^(0[1-9]|1[0-2]|[0-1])$"
-          />
-          <input
-            id="exprition-year"
-            className="input-basic"
-            type="text"
-            placeholder="YY"
-            name="expirationYear"
-            value={expirationYear}
-            onChange={handleInputChange(v => v.length > 1, 'username')}
-            minLength={2}
-            maxLength={2}
-          />
-        </div>
-      </div>
+
+      <CardExpirationInput
+        expirationMonth={expirationMonth}
+        expirationYear={expirationYear}
+        handleInputChange={handleInputChange}
+      />
+
       <div className="input-container">
         <label htmlFor="username" className="input-title">
           카드 소유자 이름(선택)
@@ -323,6 +300,9 @@ const CreateCard = ({ goToPage }) => {
           className="input-basic"
           placeholder="카드에 표시된 이름과 동일하게 입력하세요."
         />
+        <p style={{ color: 'red', fontSize: 12 }}>
+          {'이름은 30자리까지 입력할 수 있습니다.'}
+        </p>
       </div>
 
       {/* getElementById 문제점 - id가 바뀌었을 때 헷갈림 */}
@@ -341,6 +321,7 @@ const CreateCard = ({ goToPage }) => {
           maxLength={3}
         />
       </div>
+
       <div className="input-container">
         <label htmlFor="first-pw" className="input-title">
           카드 비밀번호
