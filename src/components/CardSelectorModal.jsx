@@ -14,14 +14,12 @@ const CardSelectorModal = ({ cards, handleCardClick, closeModal }) => {
               className="modal-item-container"
               onClick={() => handleCardClick(item.cardNum)}
             >
-              <div
-                className="modal-item-dot"
-                style={{ backgroundColor: item.bgColor }}
-              ></div>
+              <div className={`modal-item-dot ${item.name}`}></div>
               <span className="modal-item-name">{item.name} 카드</span>
             </div>
           ))}
         </div>
+
         <div className="flex-center">
           {cards.slice(4, cards.length).map(item => (
             <div
@@ -29,10 +27,7 @@ const CardSelectorModal = ({ cards, handleCardClick, closeModal }) => {
               className="modal-item-container"
               onClick={() => handleCardClick(item.cardNum)}
             >
-              <div
-                className="modal-item-dot"
-                style={{ backgroundColor: item.bgColor }}
-              ></div>
+              <div className={`modal-item-dot ${item.name}`}></div>
               <span className="modal-item-name">{item.name} 카드</span>
             </div>
           ))}

@@ -2,7 +2,7 @@
   width: 375px;
   height: 220px;
 
-  border-radius: 5px 5px 15px 15px;
+  border-radius: 0 0 15px 15px;
 
   display: flex;
   justify-content: center;
@@ -27,7 +27,7 @@
 
   background: rgba(0, 0, 0, 0.5);
 
-  border-radius: 15px;
+  border-radius: 15px 15px;
 
   z-index: 5;
 }
@@ -52,3 +52,43 @@
   font-size: 12px;
   letter-spacing: -0.085rem;
 }
+
+.포코 {
+  background-color: #e24141;
+  color: white;
+}
+.준 {
+  background-color: #547ce4;
+  color: white;
+}
+
+.공원 {
+  background-color: #73bc6d;
+  color: black;
+}
+.브랜 {
+  background-color: #de59b9;
+  color: white;
+}
+.로이 {
+  background-color: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(4, 192, 158, 0.31) 0%,
+    rgba(4, 192, 158, 0.457344) 65.1%,
+    #04c09e 100%
+  );
+  color: black;
+}
+.도비 {
+  background-color: #e76e9a;
+  color: black;
+}
+.콜린 {
+  background-color: #f37d3b;
+  color: black;
+}
+.썬 {
+  background-color: #fbcd58;
+  color: black;
+}
+/* return { backgroundColor: 'LightGray', color: 'black' }; */
