@@ -18,10 +18,9 @@ const CardExpirationInput = ({
           placeholder="MM"
           name="expirationMonth"
           value={expirationMonth}
-          onChange={handleInputChange(v => v.length > 1, 'expiration-year')}
+          onChange={handleInputChange(v => v.length === 2, 'expiration-year')}
           minLength={2}
           maxLength={2}
-          pattern="^(0[1-9]|1[0-2]|[0-1])$"
         />
         <span style={{ color: 'black' }}>
           {expirationMonth.length > 1 && '/'}
@@ -33,7 +32,7 @@ const CardExpirationInput = ({
           placeholder="YY"
           name="expirationYear"
           value={expirationYear}
-          onChange={handleInputChange(v => v.length > 1, 'username')}
+          onChange={handleInputChange(v => v.length === 2, 'username')}
           minLength={2}
           maxLength={2}
         />

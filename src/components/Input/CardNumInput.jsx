@@ -5,18 +5,12 @@ import React from 'react';
 
 // 어떨 때 추론? 생각해보기 (깨질수있는것-className, name. 바뀌는가?) -> 안전하고 유연
 // 명확하게 마지막이라는 것을. default 값을 많이 넣기. 추론하게 하지 않고 명시적으로!
-const CardNumInput = ({
-  type = 'text',
-  name,
-  value,
-  onChange,
-  final = false,
-}) => {
+const CardNumInput = ({ name, value, onChange, final = false }) => {
   return (
     <>
       <input
         id={name}
-        type={type}
+        type="text"
         name={name}
         value={value}
         minLength={4}
