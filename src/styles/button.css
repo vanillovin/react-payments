@@ -7,9 +7,36 @@
   margin-right: 10px;
 }
 
-.createNext {
-  width: auto;
-  border: none;
-  padding: 10px;
+.close-modal-button {
+  border: 0;
+  right: 0;
+  bottom: 216px;
+  cursor: pointer;
+  font-size: 15px;
+  border-radius: 5px 0 0 0;
+  padding: 5px 10px;
+  font-weight: bold;
+  position: absolute;
+  background-color: white;
+}
+
+.back-button {
+  cursor: pointer;
+  font-size: 20px;
+  color: #202020;
+  border: 0;
   background-color: transparent;
+  margin-right: 15px;
+}
+
+.delete-card-btn {
+  border: 0;
+  cursor: pointer;
+  margin-left: 5px;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 12px;
+}
+.delete-card-btn:hover {
+  background-color: rgb(233, 220, 220);
 }
