@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import uuid from '../uuid';
+import { useCardInMaking, useSetCardInMaking } from '../context';
 import CardNumInput from '../components/Input/CardNumInput';
 import CardSelectorModal from '../components/CardSelectorModal';
-import CardExpirationInput from '../components/CardExpirationInput';
-import Message from '../components/Message';
+import ErrorMessage from '../components/ErrorMessage';
+
+import { cards } from '../components/cards';
+import { getCardName } from '../components/getCardName';
+import { getCardColor } from '../components/getCardColor';
+
+import PasswordInput from '../components/Input/PasswordInput';
+import TextInput from '../components/Input/TextInput';
 
 const CreateCard = ({ goToPage }) => {
+  const cardInMaking = useCardInMaking();
+  const setCardInMaking = useSetCardInMaking();
+  console.log('CreateCard cardInaMaking', cardInMaking);
+
   // forwradRef
   // Controlled (react) <-> Uncontrolled (vanilla js)
   // 상태가 없는 것과 있는 것
   // 상태를 통해 value를 통제. 값이 바뀔 때마다
   // 서로 다른 상태를 섞어놓지 않기.
+
+  // 페이지 내의 상태 - 지역상태
   const [inputs, setInputs] = useState({
     cardNum1: '',
     cardNum2: '',
@@ -26,6 +40,7 @@ const CreateCard = ({ goToPage }) => {
       fourth: '',
     },
   });
+
   const {
     cardNum1,
     cardNum2,
@@ -35,76 +50,27 @@ const CreateCard = ({ goToPage }) => {
     expirationYear,
     username,
     securityCode,
-    password: { first, second, third, fourth },
+    password,
   } = inputs;
   const [modal, setModal] = useState(true);
-  // 밖에?
-  const cards = [
-    {
-      name: '포코',
-      bgColor: '#E24141',
-      cardNum: { cardNum1: '1111', cardNum2: '1111' },
-    },
-    {
-      name: '준',
-      bgColor: '#547CE4',
-      cardNum: { cardNum1: '2222', cardNum2: '2222' },
-    },
-    {
-      name: '공원',
-      bgColor: '#73BC6D',
-      cardNum: { cardNum1: '3333', cardNum2: '3333' },
-    },
-    {
-      name: '브랜',
-      bgColor: '#DE59B9',
-      cardNum: { cardNum1: '4444', cardNum2: '4444' },
-    },
-    {
-      name: '로이드',
-      bgColor: '#94DACD',
-      cardNum: { cardNum1: '5555', cardNum2: '5555' },
-    },
-    {
-      name: '도비',
-      bgColor: '#E76E9A',
-      cardNum: { cardNum1: '6666', cardNum2: '6666' },
-    },
-    {
-      name: '콜린',
-      bgColor: '#F37D3B',
-      cardNum: { cardNum1: '7777', cardNum2: '7777' },
-    },
-    {
-      name: '썬',
-      bgColor: '#FBCD58',
-      cardNum: { cardNum1: '8888', cardNum2: '8888' },
-    },
-  ];
 
-  // 함수형 사고 - 함수를 리턴하는 함수
-  // partial application 부분적용
-  // 일부 매개변수를 미리 받아서, 나머지 매개변수를 받는 함수를 만드는 부분적용
-  // 두 개의 매개변수(validate, nextElem)만 미리 받아서ㅡ e를 받아서 처리하는 event handler를 반환
-
-  // ate 동사 tion 명사 - validate 검증하다 / validation 검증
-  // 간단하게. 짧은것 <<< 읽기쉬운것 <<<<<< 짧으면서읽기쉬운것
   function handleInputChange(validate, nextElemId) {
     return e => {
       const { name, value, pattern } = e.target;
-      console.log(pattern);
-      if (pattern && !RegExp(pattern).test(value)) {
-        // 패턴이 있고 통과하지 못하면
-        return;
-      }
-      // 쓰는곳이랑 가까이
+
+      const onlyText = text => {
+        const pattern = /[0-9]|[ \[\]{}()<>?|`~!@#$%^&*-_+=,.;:\"'\\]/g;
+        return !pattern.test(text);
+      };
+
+      if (pattern && !RegExp(pattern).test(value)) return;
+
       const isNumberText = text => !isNaN(text);
-      if (name !== 'username') {
-        if (!isNumberText(value)) return;
+      if (name === 'username') {
+        if (!onlyText(value)) return;
       } else {
-        if (isNumberText(value)) return;
+        if (!isNumberText(value)) return;
       }
-      // 띄어쓰기 막기
 
       setInputs(prev => ({
         ...prev,
@@ -116,86 +82,26 @@ const CreateCard = ({ goToPage }) => {
       }));
 
       const nextElem = document.getElementById(nextElemId);
-
       if (validate(value)) {
         nextElem.focus();
       }
     };
   }
 
-  // 다음으로
-  const test = () => {
-    // 모두 입력됐는지 & 유효성 검사
-    goToPage(2);
-  };
-
-  // 컴포넌트 분리?
   const numStateArr = [
-    { id: 'cardNum1', state: cardNum1, nextId: 'cardNum2' },
-    { id: 'cardNum2', state: cardNum2, nextId: 'cardNum3' },
-    { id: 'cardNum3', state: cardNum3, nextId: 'cardNum4' },
-    { id: 'cardNum4', state: cardNum4, nextId: 'expiration-month' },
+    { name: 'cardNum1', nextId: 'cardNum2' },
+    { name: 'cardNum2', nextId: 'cardNum3' },
+    { name: 'cardNum3', nextId: 'cardNum4' },
+    { name: 'cardNum4', nextId: 'expiration-month' },
   ];
   const pwStateArr = [
-    { id: 'first', state: first, nextId: 'second-pw' },
-    { id: 'second', state: second, nextId: 'third-pw' },
-    { id: 'third', state: third, nextId: 'fourth-pw' },
-    { id: 'fourth', state: fourth, nextId: 'nextButton' },
+    { name: 'first', nextId: 'second-pw' },
+    { name: 'second', nextId: 'third-pw' },
+    { name: 'third', nextId: 'fourth-pw' },
+    { name: 'fourth', nextId: 'nextButton' },
   ];
 
-  // 낯선것 어려운것-익숙 재미없는것
-
-  // const arr = [
-  //   { cardNum1: "1111", cardNum2: "1111", backgroundColor: "#E24141" },
-  //   { cardNum1: "2222", cardNum2: "2222", backgroundColor: "#547CE4" },
-  // ];
-  // arr.forEach(a=>{
-  //   if (cardNum1 === a.cardNum1 &&  cardNum2===a.cardNum2){
-  //     return a.backgroundColor;
-  //   }
-  // })
-
-  // 함수형 - 역할을 중복되지 않게 분리하기
-  const getCardName = (cardNum1, cardNum2) => {
-    if (cardNum1 === '1111' && cardNum2 === '1111') return '포코';
-    if (cardNum1 === '2222' && cardNum2 === '2222') return '준';
-    if (cardNum1 === '3333' && cardNum2 === '3333') return '공원';
-    if (cardNum1 === '4444' && cardNum2 === '4444') return '브랜';
-    if (cardNum1 === '5555' && cardNum2 === '5555') return '로이드';
-    if (cardNum1 === '6666' && cardNum2 === '6666') return '도비';
-    if (cardNum1 === '7777' && cardNum2 === '7777') return '콜린';
-    if (cardNum1 === '8888' && cardNum2 === '8888') return '썬';
-    return '유효하지 않은';
-  };
-
-  function getCardColor(cardNum1, cardNum2) {
-    const cardName = getCardName(cardNum1, cardNum2);
-    if (cardName === '포코')
-      return { backgroundColor: '#E24141', color: 'white' };
-    if (cardName === '준')
-      return { backgroundColor: '#547CE4', color: 'white' };
-    if (cardName === '공원')
-      return { backgroundColor: '#73BC6D', color: 'black' };
-    if (cardName === '브랜')
-      return { backgroundColor: '#DE59B9', color: 'white' };
-    if (cardName === '로이드')
-      return {
-        background:
-          'radial-gradient(50% 50% at 50% 50%, rgba(4, 192, 158, 0.31) 0%, rgba(4, 192, 158, 0.457344) 65.1%, #04C09E 100%)',
-        color: 'black',
-      };
-    if (cardName === '도비')
-      return { backgroundColor: '#E76E9A', color: 'black' };
-    if (cardName === '콜린')
-      return { backgroundColor: '#F37D3B', color: 'black' };
-    if (cardName === '썬')
-      return { backgroundColor: ' #FBCD58', color: 'black' };
-    return { backgroundColor: 'LightGray', color: 'black' };
-  }
-
-  // num에 따라 정해지는 파생상태
   const handleCardClick = cardNum => {
-    // useState 비동기 순서
     setInputs(prev => ({
       ...prev,
       cardNum1: cardNum.cardNum1,
@@ -204,8 +110,74 @@ const CreateCard = ({ goToPage }) => {
     setModal(false);
   };
 
+  useEffect(() => {
+    if (getCardName(cardNum1, cardNum2) === '유효하지 않은') {
+      setModal(true);
+    }
+  }, [cardNum1, cardNum2, cardNum3, cardNum4]);
+
+  const [errors, setErrors] = useState('');
+
+  // state를 받아서... 그 state를 이용한 maxLength 함수를 생성해서 반환!
+  // partial application 부분 적용
+  const createMaxLength = state => (id, name, max) => {
+    if (state[name].length < max) {
+      return [id, name];
+    }
+    return true;
+  };
+  const maxLength = createMaxLength(inputs);
+  const maxPWLength = createMaxLength(password);
+
+  // 부수효과를 일으키면 함수명 대부분 동사로
+  const validate = () => {
+    // some every find
+    // 드모르간 법칙
+    const [errorId, errorName] =
+      [
+        maxLength('cardNum1', 'cardNum1', 4),
+        maxLength('cardNum2', 'cardNum2', 4),
+        maxLength('cardNum3', 'cardNum3', 4),
+        maxLength('cardNum4', 'cardNum4', 4),
+        maxLength('expiration-month', 'expirationMonth', 2),
+        maxLength('expiration-year', 'expirationYear', 2),
+        maxLength('username', 'username', 1),
+        maxLength('security-code', 'securityCode', 3),
+
+        maxPWLength('first-pw', 'first', 1),
+        maxPWLength('second-pw', 'second', 1),
+        maxPWLength('third-pw', 'third', 1),
+        maxPWLength('fourth-pw', 'fourth', 1),
+      ].find(v => v !== true) || [];
+
+    if (errorId) {
+      document.getElementById(errorId).focus();
+      setErrors(errorName);
+      return false;
+    }
+
+    return true;
+  };
+
+  const onNextPage = () => {
+    if (!validate()) return;
+
+    setCardInMaking({
+      id: uuid(),
+      cardNums: `${cardNum1}-${cardNum2}-${cardNum3}-${cardNum4}`,
+      username,
+      expirationMonth,
+      expirationYear,
+      securityCode,
+      // validation 함수 땜에 password['name'] 반복 돌려서 구조분해 안 했음
+      password: `${password[0]}${password[1]}${password[2]}${password[3]}`,
+      cardNickname: getCardName(cardNum1, cardNum2),
+    });
+    goToPage(2);
+  };
+
   return (
-    <div className="CreateCard" style={{ padding: 15 }}>
+    <div className="CreateCard" style={{ padding: '10px  15px' }}>
       {modal && (
         <CardSelectorModal
           cards={cards}
@@ -213,7 +185,6 @@ const CreateCard = ({ goToPage }) => {
           closeModal={() => setModal(false)}
         />
       )}
-
       <div
         style={{
           display: 'flex',
@@ -225,14 +196,12 @@ const CreateCard = ({ goToPage }) => {
         </button>
         <h2 className="page-title">카드 추가</h2>
       </div>
-
       <div className="card-box">
         <div
           className="empty-card"
           style={getCardColor(cardNum1, cardNum2)}
           onClick={() => setModal(true)}
         >
-          {/* inline style -> className */}
           <div className="card-top">{getCardName(cardNum1, cardNum2)} 카드</div>
           <div className="card-middle">
             <div className="small-card__chip"></div>
@@ -257,33 +226,63 @@ const CreateCard = ({ goToPage }) => {
           </div>
         </div>
       </div>
+
       <div className="input-container">
         <label htmlFor="cardNum1" className="input-title">
           카드 번호
         </label>
         <div className="input-box">
-          {numStateArr.map(({ id, state, nextId }) => (
+          {numStateArr.map(({ name, nextId }) => (
             <CardNumInput
-              id={id}
-              name={id}
-              value={state}
-              onChange={handleInputChange(value => value.length > 3, nextId)}
-              final={id === 'cardNum4'}
+              key={name}
+              name={name}
+              value={inputs[name]}
+              onChange={handleInputChange(value => value.length === 4, nextId)}
+              // 신경쓸곳?
+              final={name === 'cardNum4'}
             />
           ))}
         </div>
-        <Message
-          type="error"
+        <ErrorMessage
           text="유효하지 않은 카드번호 입니다."
           cond={getCardName(cardNum1, cardNum2) === '유효하지 않은'}
         />
+        {numStateArr.map(({ name }) => (
+          <ErrorMessage
+            key={name}
+            text="카드 번호를 4글자씩 입력해주세요."
+            cond={errors === name}
+          />
+        ))}
       </div>
 
-      <CardExpirationInput
-        expirationMonth={expirationMonth}
-        expirationYear={expirationYear}
-        handleInputChange={handleInputChange}
-      />
+      <div className="input-container">
+        <label htmlFor="expiration-month" className="input-title">
+          만료일
+        </label>
+        <div className="input-box w-50">
+          <TextInput
+            id="expiration-month"
+            name="expirationMonth"
+            value={expirationMonth}
+            minMax={2}
+            onChange={handleInputChange(v => v.length === 2, 'expiration-year')}
+            placeholder="MM"
+            pattern="^(0[1-9]|1[0-2]|[0-1])$"
+          />
+          <span style={{ color: 'black' }}>
+            {expirationMonth.length > 1 && '/'}
+          </span>
+          <TextInput
+            id="expiration-year"
+            name="expirationYear"
+            minMax={2}
+            placeholder="YY"
+            value={expirationYear}
+            onChange={handleInputChange(v => v.length === 2, 'username')}
+          />
+        </div>
+      </div>
 
       <div className="input-container">
         <label htmlFor="username" className="input-title">
@@ -300,9 +299,10 @@ const CreateCard = ({ goToPage }) => {
           className="input-basic"
           placeholder="카드에 표시된 이름과 동일하게 입력하세요."
         />
-        <p style={{ color: 'red', fontSize: 12 }}>
-          {'이름은 30자리까지 입력할 수 있습니다.'}
-        </p>
+        <ErrorMessage
+          text={`이름은 최대 30자리까지 입력할 수 있습니다. (현재 ${username.length} 자리)`}
+          cond={username.length > 0}
+        />
       </div>
 
       {/* getElementById 문제점 - id가 바뀌었을 때 헷갈림 */}
@@ -310,37 +310,35 @@ const CreateCard = ({ goToPage }) => {
         <label htmlFor="security-code" className="input-title">
           보안코드(CVC/CVV)
         </label>
-        <input
+        <PasswordInput
           id="security-code"
-          className="input-basic w-25"
-          type="password"
+          className="w-25"
           name="securityCode"
           value={securityCode}
-          onChange={handleInputChange(v => v.length > 2, 'first-pw')}
-          minLength={3}
-          maxLength={3}
+          onChange={handleInputChange(v => v.length === 3, 'first-pw')}
+          minMax={3}
         />
+        {/* <div class="tooltip">
+          Hover over me
+          <span class="tooltiptext">Tooltip text</span>
+        </div> */}
       </div>
 
       <div className="input-container">
-        <label htmlFor="first-pw" className="input-title">
-          카드 비밀번호
-        </label>
-        {pwStateArr.map(({ id, state, nextId }) => (
-          <input
-            id={id + '-pw'}
-            key={id}
-            className="input-basic w-11"
-            type="password"
-            minLength={1}
-            maxLength={1}
-            name={id}
-            value={state}
-            onChange={handleInputChange(v => v.length > 0, nextId)}
+        <label className="input-title">카드 비밀번호</label>
+        {pwStateArr.map(({ name, nextId }) => (
+          <PasswordInput
+            key={name}
+            name={name}
+            className="w-11"
+            value={password[name]}
+            onChange={handleInputChange(v => v.length === 1, nextId)}
+            minMax={1}
           />
         ))}
       </div>
-      <button id="nextButton" className="button-box createNext" onClick={test}>
+
+      <button id="nextButton" className="button-box" onClick={onNextPage}>
         <span className="button-text">다음</span>
       </button>
     </div>
